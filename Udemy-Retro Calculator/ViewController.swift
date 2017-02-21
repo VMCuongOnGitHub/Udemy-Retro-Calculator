@@ -11,6 +11,22 @@ import AVFoundation
 
 class ViewController: UIViewController {
     
+    @IBOutlet weak var numberLabel: UILabel!
+    
+    enum _operation : String {
+        case divide = "/"
+        case multiply = "*"
+        case subtract = "-"
+        case add = "+"
+        case empty = "empty"
+    }
+    
+    var currentOperation = _operation.empty
+    var runningNumber = ""
+    var leftValue = ""
+    var rightValue = ""
+    var result = ""
+    
     var buttonAudio : AVAudioPlayer!
     
     override func viewDidLoad() {
@@ -31,9 +47,14 @@ class ViewController: UIViewController {
                 print(error.debugDescription)
             }
         }
+        
+        numberLabel.text = "0"
     }
     @IBAction func buttonDidPress(sender : UIButton){
         playSounds()
+        
+        runningNumber += "\(sender.tag)"
+        numberLabel.text = runningNumber
     }
     func playSounds(){
         // Handle errors
@@ -47,6 +68,55 @@ class ViewController: UIViewController {
             print("error")
         }
     }
+    func processOperator(operation : _operation) {
+        playSounds()
+        
+        if currentOperation != _operation.empty {
+            if runningNumber != ""{
+                rightValue = runningNumber
+                runningNumber = ""
+                
+                if currentOperation == _operation.multiply{
+                    result = "\(Double(leftValue)! * Double(rightValue)!)"
+                }else if currentOperation == _operation.divide {
+                    result = "\(Double(leftValue)! / Double(rightValue)!)"
+                }else if currentOperation == _operation.subtract {
+                    result = "\(Double(leftValue)! - Double(rightValue)!)"
+                }else if currentOperation == _operation.add {
+                    result = "\(Double(leftValue)! + Double(rightValue)!)"
+                }
+                leftValue = result
+                numberLabel.text = result
+            }
+            
+            currentOperation = operation
+        } else {
+            leftValue = runningNumber
+            runningNumber = ""
+            currentOperation = operation
+        }
+    }
+    
+    @IBAction func equalButtonPressed(_ sender: Any) {
+        processOperator(operation: currentOperation)
+    }
+
+    @IBAction func divideButtonPressed(_ sender: Any) {
+        processOperator(operation: .divide)
+    }
+    
+    @IBAction func multiplyButtonPressed(_ sender: Any) {
+        processOperator(operation: .multiply)
+    }
+
+    @IBAction func minusButtonPressed(_ sender: Any) {
+        processOperator(operation: .subtract)
+    }
+    
+    @IBAction func addButtonPressed(_ sender: Any) {
+        processOperator(operation: .add)
+    }
+    
 
 }
 
